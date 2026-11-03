@@ -1,0 +1,599 @@
+```html
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Joja — A Valentine's Day Experience ❤️</title>
+
+  <!-- External Arabic & Decorative Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Alexandria:wght@300;400;600;700&family=Caveat:wght@600&family=Playfair+Display:ital,wght@0,600;1,400&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       RESET & BASE STYLES
+       ========================================================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg-cream: #FFFDF9;
+      --pink-baby: #FFB7C5;
+      --pink-blush: #FFD1DC;
+      --pink-rose: #E86F88;
+      --pastel-peach: #FFE5D9;
+      --lavender-soft: #E6E6FA;
+      --gold-champagne: #D4AF37;
+      --text-dark: #4A3E3D;
+      --font-arabic: 'Alexandria', sans-serif;
+      --font-serif: 'Playfair Display', serif;
+      --font-hand: 'Caveat', cursive;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: var(--font-arabic);
+      background-color: #FFF6F8;
+      color: var(--text-dark);
+      position: relative;
+    }
+
+    /* Background Ambient & Hearts Canvas */
+    #hearts-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Ambient Animated Gradient */
+    .bg-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 209, 220, 0.4) 0%, rgba(255, 246, 248, 0.8) 70%, #FFF5F7 100%);
+      z-index: 0;
+    }
+
+    /* Audio Control Player (Floating) */
+    .music-player {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 999;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--pink-blush);
+      border-radius: 30px;
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 15px rgba(232, 111, 136, 0.15);
+      cursor: pointer;
+      transition: transform 0.3s ease, background 0.3s ease;
+    }
+
+    .music-player:active {
+      transform: scale(0.95);
+    }
+
+    .music-icon {
+      font-size: 16px;
+      animation: pulse 1.5s infinite;
+    }
+
+    .music-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--pink-rose);
+      letter-spacing: 0.5px;
+    }
+
+    /* Main Container Stage */
+    #app-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Scene Base Structure */
+    .scene {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: scale(0.96) translateY(10px);
+    }
+
+    .scene.active {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1) translateY(0);
+    }
+
+    /* Buttons & Interactive Elements */
+    .btn-continue {
+      margin-top: 25px;
+      padding: 12px 32px;
+      background: linear-gradient(135deg, var(--pink-rose), #D85B74);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-family: var(--font-arabic);
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(232, 111, 136, 0.3);
+      opacity: 0;
+      transform: translateY(15px);
+      transition: opacity 0.5s ease, transform 0.5s ease, box-shadow 0.3s ease;
+      pointer-events: none;
+    }
+
+    .btn-continue.visible {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .btn-continue:active {
+      transform: scale(0.96);
+    }
+
+    .btn-skip {
+      position: absolute;
+      bottom: 25px;
+      background: none;
+      border: none;
+      color: var(--pink-rose);
+      font-family: var(--font-arabic);
+      font-size: 13px;
+      opacity: 0.6;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Photo Frame Base Style */
+    .photo-frame {
+      background: white;
+      padding: 12px 12px 35px 12px;
+      border-radius: 4px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+      position: relative;
+      max-width: 280px;
+      width: 85%;
+      margin-bottom: 20px;
+      transform: rotate(-1.5deg);
+      transition: transform 0.3s ease;
+    }
+
+    .photo-frame img {
+      width: 100%;
+      height: 240px;
+      object-fit: cover;
+      border-radius: 2px;
+      background-color: var(--pastel-peach);
+    }
+
+    .photo-placeholder {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 240px;
+      background: var(--pastel-peach);
+      color: var(--pink-rose);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    /* ==========================================================================
+       SCENE 1: CINEMATIC COUNTDOWN
+       ========================================================================== */
+    #scene-1 .countdown-number {
+      font-family: var(--font-serif);
+      font-size: 110px;
+      font-weight: 600;
+      color: var(--pink-rose);
+      text-shadow: 0 0 20px rgba(232, 111, 136, 0.3);
+      opacity: 0;
+      transform: scale(0.5);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    #scene-1 .countdown-number.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    /* ==========================================================================
+       SCENE 2: OPENING TYPOGRAPHY
+       ========================================================================== */
+    .typography-wrapper {
+      text-align: center;
+      direction: ltr;
+    }
+
+    .typo-word {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 600;
+      color: var(--text-dark);
+      letter-spacing: 4px;
+      margin: 12px 0;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .typo-word.highlight {
+      font-size: 40px;
+      color: var(--pink-rose);
+      text-shadow: 0 0 15px rgba(232, 111, 136, 0.2);
+    }
+
+    /* ==========================================================================
+       SCENE 3: CAT & GUITAR
+       ========================================================================== */
+    .cat-composition {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .cat-title {
+      font-family: var(--font-serif);
+      font-size: 36px;
+      letter-spacing: 6px;
+      color: var(--pink-rose);
+      margin: 10px 0;
+    }
+
+    .cat-svg-container {
+      width: 200px;
+      height: 200px;
+      margin: 15px 0;
+      animation: gentle-sway 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes gentle-sway {
+      from { transform: rotate(-3deg); }
+      to { transform: rotate(3deg); }
+    }
+
+    /* ==========================================================================
+       SCENE 4: INTERACTIVE SCRAPBOOK
+       ========================================================================== */
+    .scrapbook-wrapper {
+      width: 100%;
+      max-width: 700px;
+      perspective: 1000px;
+    }
+
+    .scrapbook-card {
+      background: #FFFDF9;
+      border: 1px solid #F0E6D2;
+      border-radius: 12px;
+      padding: 25px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.06);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    @media (min-width: 650px) {
+      .scrapbook-card {
+        flex-direction: row;
+        align-items: center;
+      }
+      .scrapbook-card .photo-frame {
+        flex: 1;
+        margin-bottom: 0;
+      }
+      .scrapbook-text-area {
+        flex: 1.2;
+      }
+    }
+
+    .scrapbook-text-area {
+      direction: rtl;
+      text-align: right;
+      font-size: 14px;
+      line-height: 1.8;
+      color: #333;
+    }
+
+    .washi-tape {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90px;
+      height: 22px;
+      background: rgba(255, 209, 220, 0.7);
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    /* ==========================================================================
+       SCENE 5 - 8: PERSONAL MESSAGES
+       ========================================================================== */
+    .msg-box {
+      direction: rtl;
+      text-align: center;
+      max-width: 90%;
+      margin-top: 15px;
+      font-size: 15px;
+      line-height: 1.9;
+      color: var(--text-dark);
+      min-height: 80px;
+    }
+
+    .word-span, .phrase-span {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      margin: 0 2px;
+    }
+
+    .word-span.visible, .phrase-span.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .highlight-phrase {
+      color: var(--pink-rose);
+      font-weight: 700;
+      font-size: 1.1em;
+      border-bottom: 2px dashed var(--pink-rose);
+    }
+
+    /* ==========================================================================
+       SCENE 9: FINAL LOVE SCENE
+       ========================================================================== */
+    .final-centerpiece {
+      text-align: center;
+    }
+
+    .final-text {
+      font-size: 48px;
+      color: var(--pink-rose);
+      font-family: var(--font-serif);
+      text-shadow: 0 0 20px rgba(232, 111, 136, 0.4);
+      margin-bottom: 15px;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Ambient Audio File -->
+  <audio id="bg-audio" loop preload="auto">
+    <source src="audio/wala-asha-wala-kan.mp3" type="audio/mpeg">
+    <source src="wala-asha-wala-kan.mp3" type="audio/mpeg">
+  </audio>
+
+  <!-- Floating Audio Controls -->
+  <div class="music-player" id="music-btn" onclick="toggleAudio()">
+    <span class="music-icon" id="music-icon">🎵</span>
+    <span class="music-text" id="music-text">تشغيل الموسيقى</span>
+  </div>
+
+  <!-- Background Canvas -->
+  <div class="bg-gradient"></div>
+  <canvas id="hearts-canvas"></canvas>
+
+  <!-- Main Experience Stage -->
+  <div id="app-stage">
+
+    <!-- SCENE 1: COUNTDOWN -->
+    <div class="scene" id="scene-1">
+      <div class="countdown-number" id="countdown">3</div>
+    </div>
+
+    <!-- SCENE 2: OPENING TYPOGRAPHY -->
+    <div class="scene" id="scene-2">
+      <div class="typography-wrapper">
+        <div class="typo-word" id="tw-1">HAPPY</div>
+        <div class="typo-word" id="tw-2">VALENTINE'S</div>
+        <div class="typo-word" id="tw-3">DAY</div>
+        <div class="typo-word highlight" id="tw-4">JOJA ❤️</div>
+      </div>
+    </div>
+
+    <!-- SCENE 3: CAT & GUITAR -->
+    <div class="scene" id="scene-3">
+      <div class="cat-composition">
+        <div class="cat-title">HAPPY</div>
+        <div class="cat-svg-container">
+          <!-- Vector Art Illustration: Cat Playing Guitar -->
+          <svg viewBox="0 0 200 200" width="100%" height="100%">
+            <!-- Cat Head & Body -->
+            <path d="M 60,90 Q 50,40 80,60 Q 100,30 120,60 Q 150,40 140,90 Q 160,150 100,160 Q 40,150 60,90 Z" fill="#FFD8B9" stroke="#E89A7A" stroke-width="3"/>
+            <!-- Ears -->
+            <polygon points="65,65 50,30 85,50" fill="#FFB7C5"/>
+            <polygon points="135,65 150,30 115,50" fill="#FFB7C5"/>
+            <!-- Eyes -->
+            <ellipse cx="80" cy="85" rx="5" ry="7" fill="#4A3E3D"/>
+            <ellipse cx="120" cy="85" rx="5" ry="7" fill="#4A3E3D"/>
+            <!-- Nose & Mouth -->
+            <polygon points="97,95 103,95 100,99" fill="#E86F88"/>
+            <path d="M 95,102 Q 100,107 105,102" fill="none" stroke="#4A3E3D" stroke-width="2"/>
+            <!-- Guitar Body -->
+            <path d="M 70,130 Q 50,110 80,110 Q 100,120 120,110 Q 150,110 130,130 Q 150,160 120,160 Q 100,150 80,160 Q 50,160 70,130 Z" fill="#D48C46" stroke="#965219" stroke-width="3"/>
+            <circle cx="100" cy="132" r="10" fill="#4A3E3D"/>
+            <!-- Guitar Neck -->
+            <rect x="120" y="125" width="45" height="8" transform="rotate(-15 120 125)" fill="#965219"/>
+          </svg>
+        </div>
+        <div class="cat-title">VALENTINE</div>
+      </div>
+      <button class="btn-continue visible" onclick="nextScene()">تابع ❤️</button>
+    </div>
+
+    <!-- SCENE 4: INTERACTIVE SCRAPBOOK -->
+    <div class="scene" id="scene-4">
+      <div class="scrapbook-wrapper">
+        <div class="scrapbook-card">
+          <div class="washi-tape"></div>
+          <div class="photo-frame">
+            <img src="photo1.jpg" alt="Photo 1" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'photo-placeholder\'>photo1.jpg</div>';">
+          </div>
+          <div class="scrapbook-text-area">
+            <p>بصي ب مناسبه اليوم الحلو ده عايز اقولك ان انا بحبك اوي خالص يا احلى جوجا ف الدنيا كلها رغم كل المشاكل اللي بتحصل بس اهم حاجة ان احنا بنفضل كويسين وبنحاول نصلح دايما بصي انا بحبك جدا جدا جدا وعارف اني مقصر معاكي ف حاجات كتير اوي بس بحاول دايما یعنی مكنش كده يارب يكون الموقع عجبك يارب وتكوني فرحانه بي ده أهم حاجه عندي وبجد انا بحبك اوي وبموت فيكي ونفسي نكمل بقيت عمرنا مع بعض يارب لحد ما نكون ف بيت واحد انشاءلله ربنا يخليكي ليا يا احلى حاجه ف حياتي ❤️❤️❤️❤️</p>
+            <br>
+            <p style="direction: ltr; text-align: left; font-weight: 600;">Love you joja💋❤️<br>❤️❤️❤️❤️💋💋💓<br>Happy Valentine day Joja❤️❤️</p>
+          </div>
+        </div>
+      </div>
+      <button class="btn-continue visible" onclick="nextScene()">التالي ❤️</button>
+    </div>
+
+    <!-- SCENE 5: YOUR BEAUTIFUL SMILE -->
+    <div class="scene" id="scene-5">
+      <div class="photo-frame">
+        <img src="photo2.jpg" alt="Photo 2" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'photo-placeholder\'>photo2.jpg</div>';">
+      </div>
+      <h3 style="color: var(--pink-rose); margin-bottom: 5px;">Your Beautiful Smile</h3>
+      <div class="msg-box" id="msg-scene-5"></div>
+      <button class="btn-continue" id="btn-5" onclick="nextScene()">Continue ❤️</button>
+      <button class="btn-skip" id="skip-5" onclick="skipAnimation(5)">تخطي الحركة</button>
+    </div>
+
+    <!-- SCENE 6: MY SWEET GIRL -->
+    <div class="scene" id="scene-6">
+      <div class="photo-frame">
+        <img src="photo3.jpg" alt="Photo 3" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'photo-placeholder\'>photo3.jpg</div>';">
+      </div>
+      <h3 style="color: var(--pink-rose); margin-bottom: 5px;">My Sweet Girl</h3>
+      <div class="msg-box" id="msg-scene-6"></div>
+      <button class="btn-continue" id="btn-6" onclick="nextScene()">Continue ❤️</button>
+      <button class="btn-skip" id="skip-6" onclick="skipAnimation(6)">تخطي الحركة</button>
+    </div>
+
+    <!-- SCENE 7: THE BEST THING THAT HAPPENED TO ME -->
+    <div class="scene" id="scene-7">
+      <div class="photo-frame">
+        <img src="photo4.jpg" alt="Photo 4" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'photo-placeholder\'>photo4.jpg</div>';">
+      </div>
+      <h3 style="color: var(--pink-rose); margin-bottom: 5px;">The Best Thing That Happened to Me</h3>
+      <div class="msg-box" id="msg-scene-7"></div>
+      <button class="btn-continue" id="btn-7" onclick="nextScene()">Continue ❤️</button>
+      <button class="btn-skip" id="skip-7" onclick="skipAnimation(7)">تخطي الحركة</button>
+    </div>
+
+    <!-- SCENE 8: ALEXANDRIA — A MEMORY TO KEEP -->
+    <div class="scene" id="scene-8">
+      <div class="photo-frame">
+        <img src="photo5.jpg" alt="Photo 5" onerror="this.onerror=null; this.parentNode.innerHTML='<div class=\'photo-placeholder\'>photo5.jpg</div>';">
+      </div>
+      <h3 style="color: var(--pink-rose); margin-bottom: 5px;">Alexandria — A Memory to Keep</h3>
+      <div class="msg-box" id="msg-scene-8"></div>
+      <button class="btn-continue" id="btn-8" onclick="nextScene()">Continue ❤️</button>
+      <button class="btn-skip" id="skip-8" onclick="skipAnimation(8)">تخطي الحركة</button>
+    </div>
+
+    <!-- SCENE 9: FINAL LOVE SCENE -->
+    <div class="scene" id="scene-9">
+      <div class="final-centerpiece">
+        <div class="final-text">𝓑𝓪𝓽𝓪𝓽𝓪🌼💕</div>
+        <p style="color: var(--pink-rose); font-size: 16px; margin-top: 10px;">Happy Valentine's Day Joja ❤️</p>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    /* ==========================================================================
+       GLOBAL STATE & CONFIG
+       ========================================================================== */
+    let currentScene = 1;
+    const totalScenes = 9;
+    let animTimers = [];
+
+    const messages = {
+      5: "لو هنتكلم عل احلي حاجه فيكي ف هي ضحكتك الي بتنورلي حياتي ويحاول دايما اخليه موجوده عل قد م اقدر وضحكتك هي الي بتنورلي حياتي ❤️❤️❤️❤️💋💋",
+      6: "اكتر حاجه بحبها في شخصيتك هي دلعك عليا وان انتي دلوعه وبحب جدا لما بتدلعي عليا ف الشات أو لما بنتقابل عشان انتي احلي دلوعه 💕💕❤️",
+      7: "وجودك ف حياتي مخليني قادر اعيش وعايز اقولك أن انتي اخلي صدفه حصلتلي ف حياتي وان احلي وقت هو الوقت الي بقضيه معاكي والوقت الي جاي كمان 😍❤️❤️❤️❤️💋",
+      8: "اخلي ذكري بالنسبالي هي نزوله اسكندريه الي كانت كلها حب ودلع واهتمام وعمري م هنسي نظرتك ليا وانتي نايمه علي كتفي دي عندي بالدنيا وعمري م هنساه ابدا وهفضل احكيه لاحفادنا واولادنا أن شاء الله ❤️❤️❤️💕💓💓"
+    };
+
+    /* ==========================================================================
+       FLOATING HEARTS ANIMATION (CANVAS)
+       ========================================================================== */
+    const canvas = document.getElementById('hearts-canvas');
+    const ctx = canvas.getContext('2d');
+    let hearts = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Heart {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 20;
+        this.size = Math.random() * 15 + 10;
+        this.speed = Math.random() * 1.5 + 0.5;
+        this.opacity = Math.random() * 0.5 + 0.3;
+        this.color = ['#FFB7C5', '#FFD1DC', '#E86F88', '#FFE5D9'][Math.floor(Math.random() * 4)];
+      }
+      update() {
+        this.y -= this.speed;
+        if (this.y < -20) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        const topCurveHeight = this.size * 0.3;
+        ctx.moveTo(this.x, this.y + topCurveHeight);
+        ctx.bezierCurveTo(this.x, this.y, this.x - this.size / 2, this.y, this.x - this.size / 2, this.y + topCurveHeight);
+        ctx.bezierCurveTo(this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + this.size, this.x, this.y + this.size);
+        ctx.bezierCurveTo(this.x, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + topCurveHeight, this.x + this.size / 2, t
